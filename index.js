@@ -1,5 +1,6 @@
 const app = require ('express')();
 const cors = require('cors');
+const port = process.env.PORT || 3001;
 
 
 const child_process = require('child_process');
@@ -106,6 +107,6 @@ app.get('/screenshot', async (req, res) => {
 
 
 
-app.listen(3001, () => {
+app.listen(port, () => {
   console.log('Server listening at localhost:3001');
 });
