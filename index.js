@@ -1,6 +1,7 @@
 const app = require ('express')();
 const cors = require('cors');
 const port = process.env.PORT || 3001;
+const ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg'
 
 
 const child_process = require('child_process');
@@ -73,11 +74,11 @@ app.get('/screenshot', async (req, res) => {
 
 
   if (length == '0') {
-    command = `yt-dlp "https://www.youtube.com/live/${videoId}" --live-from-start --download-sections "#-8seconds - 0" -o temp/${timestamp}_temp.mp4 && ffmpeg -sseof -1 -i temp/${timestamp}_temp.mp4 -vframes 1 temp/${timestamp}_converted_temp.png && ffmpeg -i temp/${timestamp}_converted_temp.png -filter_complex "[0:v]setpts=(1/60)*PTS, crop=${cropBounds.width}:${cropBounds.height}:${cropBounds.left}:${cropBounds.top}, scale=-1:333:flags=lanczos[v]" -map "[v]" -an temp/${timestamp}_cropped_temp.png && ffmpeg -i temp/${timestamp}_cropped_temp.png -i "watermarks/${watermark}.png" -filter_complex "[1]scale=-1:60[wm]; [0][wm]overlay=10:H-h-10" temp/${timestamp}_marked.png`;
+    command = `yt-dlp "https://www.youtube.com/live/${videoId}" --live-from-start --download-sections "#-8seconds - 0" -o temp/${timestamp}_temp.mp4 && ${ffmpegPath} -sseof -1 -i temp/${timestamp}_temp.mp4 -vframes 1 temp/${timestamp}_converted_temp.png && ${ffmpegPath} -i temp/${timestamp}_converted_temp.png -filter_complex "[0:v]setpts=(1/60)*PTS, crop=${cropBounds.width}:${cropBounds.height}:${cropBounds.left}:${cropBounds.top}, scale=-1:333:flags=lanczos[v]" -map "[v]" -an temp/${timestamp}_cropped_temp.png && ${ffmpegPath} -i temp/${timestamp}_cropped_temp.png -i "watermarks/${watermark}.png" -filter_complex "[1]scale=-1:60[wm]; [0][wm]overlay=10:H-h-10" temp/${timestamp}_marked.png`;
   }
   else {
     let speedValue = ((parseInt(startTime) * -1) - (parseInt(endTime) * -1)) / parseInt(length);
-    command = `yt-dlp "https://www.youtube.com/live/${videoId}" --live-from-start --download-sections "#${startTime} - ${endTime}" -o temp/${timestamp}_temp.mp4 && ffmpeg -i temp/${timestamp}_temp.mp4 -filter_complex "[0:v]setpts=(1/${speedValue})*PTS, crop=${cropBounds.width}:${cropBounds.height}:${cropBounds.left}:${cropBounds.top}[v]" -map "[v]" -an temp/${timestamp}_cropped_temp.mp4 && ffmpeg -i temp/${timestamp}_cropped_temp.mp4 -i "watermarks/${watermark}.png" -filter_complex "[1]scale=-1:100[wm];[0][wm]overlay=10:H-h-10" -y temp/${timestamp}_marked_temp.mp4 && ffmpeg -i temp/${timestamp}_marked_temp.mp4 -filter_complex "[0:v]fps=30,scale=-1:333:flags=lanczos,palettegen[p];[0:v]fps=30,scale=-1:333:flags=lanczos[x];[x][p]paletteuse" -y temp/${timestamp}_marked.gif`;
+    command = `yt-dlp "https://www.youtube.com/live/${videoId}" --live-from-start --download-sections "#${startTime} - ${endTime}" -o temp/${timestamp}_temp.mp4 && ${ffmpegPath} -i temp/${timestamp}_temp.mp4 -filter_complex "[0:v]setpts=(1/${speedValue})*PTS, crop=${cropBounds.width}:${cropBounds.height}:${cropBounds.left}:${cropBounds.top}[v]" -map "[v]" -an temp/${timestamp}_cropped_temp.mp4 && ${ffmpegPath} -i temp/${timestamp}_cropped_temp.mp4 -i "watermarks/${watermark}.png" -filter_complex "[1]scale=-1:100[wm];[0][wm]overlay=10:H-h-10" -y temp/${timestamp}_marked_temp.mp4 && ${ffmpegPath} -i temp/${timestamp}_marked_temp.mp4 -filter_complex "[0:v]fps=30,scale=-1:333:flags=lanczos,palettegen[p];[0:v]fps=30,scale=-1:333:flags=lanczos[x];[x][p]paletteuse" -y temp/${timestamp}_marked.gif`;
   }
 
 
